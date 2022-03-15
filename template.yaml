@@ -1,0 +1,176 @@
+apiVersion: backstage.io/v1beta2
+kind: Template
+metadata:
+  name: outputport-s3-template
+  title: Output Port S3 Template
+  description: Create a repository containing the definition of an S3 Output Port
+  tags:
+    - aws
+    - s3
+    - output-port
+spec:
+  owner: agilelab
+  type: outputport
+  
+  parameters:
+    - title: Provide some simple information
+      required:
+        - name
+        - directory
+        - cdp_environment
+        - owner
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the output port
+        fullyQualifiedName:
+          title: Fully Qualified Name
+          type: string
+          description: Human-readable that uniquely identifies an entity
+        displayName:
+          title: Display Name
+          type: string
+          description: Optional name used for display purposes
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this output port is for.
+        directory:
+          title: Directory
+          type: string
+          description: Name of the directory on S3.
+        cdp_environment:
+          title: CDP Environment
+          type: string
+          description: CDP Environment that owns the S3 bucket.
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the output port
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds: 
+              - Group
+        processDescription: 
+          title: Process description
+          type: string
+          description: What is the underlying process that contributes to generate the data exposed by this output port
+
+    - title: Data Product details
+      required:
+        - dataproduct
+        - domain
+      properties:
+        dataproduct:
+          title: Data Product
+          type: string
+          description: the Data Product this output port belongs to
+          ui:field: EntityPicker
+          ui:filter: domain
+          ui:options:
+            allowedKinds: 
+              - System
+        domain:
+          title: Domain
+          type: string
+          description: the Domain of the Data Product this output port belongs to
+          ui:field: EntityPicker
+          ui:options:
+            allowedKinds: 
+              - Domain
+
+    - title: Policies
+      properties:
+        billingPolicy:
+          title: Billing policy
+          type: string
+          description: How a consumer will be charged back when it consumes this output port
+        securityPolicy:
+          title: Security policy
+          type: string
+          description: Additional information related to security aspects, like restrictions, maskings, sensibile information
+        consumerPolicy:
+          title: Consumer policy
+          type: string
+          description:  Any other information needed by the consumer in order to effectively consume the data
+
+    - title: Choose a location  
+      required:
+        - repoUrl
+      properties: 
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - gitlab.com
+        rootDirectory:
+          title: Root Directory
+          type: string
+          description:  Path that will be used as the repository root for this component
+          default: .
+
+    - title: Final info
+      properties:
+        allow:
+          title: Allow
+          type: array
+          items:
+            type: string
+          description: It is an array of user/role/group related to the specific technology
+        dependsOn:
+          title: Depends on
+          type: array
+          items:
+            type: string
+          description: An output port could depend on other output ports or storage areas
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: '{{ parameters.rootDirectory }}'
+        copyWithoutRender:
+          - .gitlab-ci.yml
+        values:
+          name: '{{ parameters.name }}'
+          fullyQualifiedName: '{{ parameters.fullyQualifiedName }}'
+          displayName: '{{ parameters.displayName }}'
+          description: '{{ parameters.description }}'
+          artifact_id: '{{ parameters.name }}'
+          directory: '{{ parameters.directory }}'
+          cdp_environment: '{{ parameters.cdp_environment }}'
+          domain: '{{ parameters.domain }}'
+          dataproduct: '{{ parameters.dataproduct }}'
+          owner: '{{ parameters.owner }}'
+          destination: '{{ parseRepoUrl parameters.repoUrl }}'
+          processDescription: '{{ parameters.processDescription }}'
+          billingPolicy: '{{ parameters.billingPolicy }}'
+          securityPolicy: '{{ parameters.securityPolicy }}'
+          consumerPolicy: '{{ parameters.consumerPolicy }}'
+          allow: '{{ parameters.allow }}'
+          dependsOn: '{{ parameters.dependsOn }}'
+    - id: publish
+      name: Publish
+      action: witboostMeshComponent:publish:gitlab
+      input:
+        allowedHosts: ['gitlab.com']
+        description: 'This is {{ parameters.name }}'
+        repoUrl: '{{ parameters.repoUrl }}'
+        rootDirectory: '{{ parameters.rootDirectory }}'
+        dataproduct: '{{ parameters.dataproduct }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: '{{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/{{ parameters.rootDirectory }}/catalog-info.yaml'
+
+  output:
+    remoteUrl: '{{ steps.publish.output.remoteUrl }}'
+    entityRef: '{{ steps.register.output.entityRef }}'
