@@ -67,7 +67,7 @@ spec:
           type: string
           description: the Domain of the Data Product this output port belongs to
           ui:field: EntityPicker
-          ui:options:
+          ui:option:
             allowedKinds: 
               - Domain
               
