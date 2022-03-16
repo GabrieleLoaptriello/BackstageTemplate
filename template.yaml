@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1beta2
 kind: Template
 metadata:
-  name: outputport-s3-template
+  name: outputport-s3-template-1
   title: Output Port S3 Template
   description: Create a repository containing the definition of an S3 Output Port
   tags:
@@ -49,8 +49,8 @@ spec:
           type: string
           description: Owner of the output port
           ui:field: OwnerPicker
-          ui:options:
-            allowedKinds: 
+          ui:option:
+            allowedKind: 
               - Group
         processDescription: 
           title: Process description
@@ -67,8 +67,8 @@ spec:
           type: string
           description: the Domain of the Data Product this output port belongs to
           ui:field: EntityPicker
-          ui:options:
-            allowedKinds: 
+          ui:option:
+            allowedKind: 
               - Domain
               
         dataproduct:
