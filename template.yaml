@@ -80,7 +80,7 @@ spec:
             fieldName: domain
             fieldValue: spec.domain
           ui:options:
-            allowedKinds: 
+            allowedKind: 
               - System
 
     - title: Policies
