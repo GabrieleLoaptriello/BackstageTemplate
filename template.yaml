@@ -76,8 +76,7 @@ spec:
           type: string
           description: the Data Product this output port belongs to
           ui:field: EntityPicker
-          ui:filter: 
-            fieldName: domain
+          ui:filter:
             fieldValue: spec.domain
           ui:options:
             allowedKinds: 
