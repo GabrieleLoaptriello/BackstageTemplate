@@ -62,6 +62,15 @@ spec:
         - dataproduct
         - domain
       properties:
+        domain:
+          title: Domain
+          type: string
+          description: the Domain of the Data Product this output port belongs to
+          ui:field: EntityPicker
+          ui:options:
+            allowedKinds: 
+              - Domain
+              
         dataproduct:
           title: Data Product
           type: string
@@ -71,14 +80,6 @@ spec:
           ui:options:
             allowedKinds: 
               - System
-        domain:
-          title: Domain
-          type: string
-          description: the Domain of the Data Product this output port belongs to
-          ui:field: EntityPicker
-          ui:options:
-            allowedKinds: 
-              - Domain
 
     - title: Policies
       properties:
