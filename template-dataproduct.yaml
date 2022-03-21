@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1beta2
 kind: Template
 metadata:
-  name: dataproduct-template
+  name: dataproduct-template-2
   title: Data Product Template 2
   description: Create a repository containing the definition of a Data Product 2
   tags:
