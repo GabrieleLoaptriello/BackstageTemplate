@@ -80,7 +80,7 @@ spec:
             - fieldName: domain
               entityPath: spec.domain
             - fieldName: owner
-              entityPath: spec.mesh.owner
+              entityPath: spec.owner
           ui:options:
             allowedKinds: 
               - System
