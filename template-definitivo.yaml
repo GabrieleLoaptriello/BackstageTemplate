@@ -49,8 +49,8 @@ spec:
           type: string
           description: Owner of the output port
           ui:field: OwnerPicker
-          ui:option:
-            allowedKind: 
+          ui:options:
+            allowedKinds: 
               - Group
         processDescription: 
           title: Process description
