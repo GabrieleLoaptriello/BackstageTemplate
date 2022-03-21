@@ -1,0 +1,136 @@
+apiVersion: backstage.io/v1beta2
+kind: Template
+metadata:
+  name: dataproduct-template-2
+  title: Data Product Template 2
+  description: Create a repository containing the definition of a Data Product 2
+  tags:
+    - data-product
+spec:
+  owner: agilelab
+  type: dataproduct
+  
+  parameters:
+    - title: Data Product details
+      required:
+        - identifier
+        - description
+        - domain
+        - dataProductOwner
+        - developmentGroup
+        - email
+        - name
+      properties:
+        identifier:
+          title: Identifier
+          type: string
+          description: A unique identifier for the entity inside the domain. It will not be editable aftrer creation and is expected to be a string that is sequences of [a-zA-Z0-9] separated by any of [-_], at most 63 characters in total. An example could be 'finance-customer'
+        fullyQualifiedName:
+          title: Fully Qualified Name
+          type: string
+          description: Human-readable that uniquely identifies an entity
+        name:
+          title: Name
+          type: string
+          description: Required name used for display purposes
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this Data Product is for.
+        domain:
+          title: Domain
+          type: string
+          description: the Domain of the Data Product
+          ui:field: EntityPicker
+          ui:options:
+            allowedKinds: 
+              - Domain
+        developmentGroup:
+          title: DevelopmentGroup
+          type: string
+          description: Dataproduct development group
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds: 
+              - Group
+        dataProductOwner:
+          title: DataProductOwner
+          type: string
+          description: User who owns of the dataproduct
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds: 
+              - User      
+        email:
+          title: Contact email
+          type: string
+          description:  Point of contact
+        informationSLA: 
+          title: InformationSLA
+          type: string
+          description: Describe what SLA the DP team is providing to answer additional information requests about the DP
+        maturity:
+          title: Maturity
+          type: string
+          description: Understand if it is a tactical solution or not
+          enum:
+            - Tactical
+            - Strategic
+    - title: Choose a location  
+      required:
+        - repoUrl
+      properties: 
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - gitlab.com
+        rootDirectory:
+          title: Root Directory
+          type: string
+          description:  Path that will be used as the repository root for this component
+          default: .
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: '{{ parameters.rootDirectory }}'
+        copyWithoutRender:
+          - .gitlab-ci.yml
+        values:
+          domain: '{{ parameters.domain }}'
+          identifier: '{{ parameters.identifier }}'
+          destination: '{{ parseRepoUrl parameters.repoUrl }}'
+          description: '{{ parameters.description }}'
+          dataProductOwner: '{{ parameters.dataProductOwner }}'
+          developmentGroup: '{{ parameters.developmentGroup }}'
+          email: '{{ parameters.email }}'
+          fullyQualifiedName: '{{ parameters.fullyQualifiedName }}'
+          name: '{{ parameters.name }}'
+          informationSLA: '{{ parameters.informationSLA }}'
+          maturity: '{{ parameters.maturity }}'
+    - id: publish
+      name: Publish
+      action: witboostMeshComponent:publish:gitlab
+      input:
+        allowedHosts: ['gitlab.com']
+        description: 'This is {{ parameters.name }}'
+        repoUrl: '{{ parameters.repoUrl }}'
+        rootDirectory: '{{ parameters.rootDirectory }}'
+        dataproduct: '{{ parameters.dataproduct }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: '{{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/{{ parameters.rootDirectory }}/catalog-info.yaml'
+
+  output:
+    remoteUrl: '{{ steps.publish.output.remoteUrl }}'
+    entityRef: '{{ steps.register.output.entityRef }}'
