@@ -79,8 +79,6 @@ spec:
           ui:filter: 
             - fieldName: domain
               entityPath: spec.domain
-            - fieldName: owner
-              entityPath: spec.owner
           ui:options:
             allowedKinds: 
               - System
