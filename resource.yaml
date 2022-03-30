@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: external-resource
+  description: Stores all the resource
+spec:
+  type: database
+  owner: agilelab
+  system: sales-lead-1
